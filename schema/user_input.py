@@ -56,3 +56,12 @@ class UserInput(BaseModel):
             return 2
         else:
             return 3
+# Pydantic model for input validation
+class PredictionInput(BaseModel):
+    age: int
+    weight: float
+    height: float
+    income_lpa: float
+    smoker: bool
+    city: str
+    occupation: str
