@@ -1,5 +1,3 @@
-
-
 # Insurance Premium Predictor
 
 This project predicts the insurance premium category for users based on their personal and lifestyle details. It uses a machine learning model served via a FastAPI backend and provides a user-friendly interface using Streamlit or Gradio.
@@ -8,8 +6,40 @@ This project predicts the insurance premium category for users based on their pe
 
 - **FastAPI Backend**: Serves the machine learning model for predictions.
 - **Streamlit Frontend**: Provides an interactive UI for users to input their details and view predictions.
+- **Authentication**: Includes signup and login functionality for user management.
 - **Gradio Interface**: Supports deployment on Hugging Face Spaces.
 - **Dockerized Setup**: Easily deployable using Docker.
+
+## Authentication Endpoints
+
+- **`POST /api/auth/signup`**: Allows users to create an account.
+- **`POST /api/auth/login`**: Allows users to log in with their credentials.
+
+### Example Signup Request
+
+```json
+{
+  "username": "testuser",
+  "password": "securepassword"
+}
+```
+
+### Example Login Request
+
+```json
+{
+  "username": "testuser",
+  "password": "securepassword"
+}
+```
+
+### Example Login Response
+
+```json
+{
+  "message": "Login successful"
+}
+```
 
 ## How to Run Locally
 

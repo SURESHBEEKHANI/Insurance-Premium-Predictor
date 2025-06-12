@@ -1,52 +1,81 @@
 # routes/predict.py
-
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
-from schema.user_input import UserInput  # Input data model
-from schema.prediction_response import PredictionResponse  # Output data model
-from model.predict import predict_output, model, MODEL_VERSION  # Model and predict function
+from pydantic import BaseModel
+import pandas as pd
+import pickle
+from schema.user_input import UserInput
+from schema.prediction_response import PredictionResponse
+from model.predict import predict_output
 
-# Create a new router instance
+# Create router
 router = APIRouter()
 
-# Human-readable home route (basic test or welcome message)
-@router.get('/')
-def home():
-    return {'message': 'Insurance Premium Prediction API'}
+# Load the ML model
+try:
+    with open("model/model.pkl", "rb") as f:
+        model = pickle.load(f)
+except FileNotFoundError:
+    raise RuntimeError("Model file not found. Ensure 'model/model.pkl' exists.")
 
-# Health check route (machine-readable, for monitoring)
-@router.get('/health')
-def health_check():
-    return {
-        'status': 'OK',                  # Server is running
-        'version': MODEL_VERSION,        # Model version
-        'model_loaded': model is not None  # Check if model is loaded
-    }
+# Pydantic model for input validation
+class PredictionInput(BaseModel):
+    age: int
+    weight: float
+    height: float
+    income_lpa: float
+    smoker: bool
+    city: str
+    occupation: str
 
-# Prediction route that takes input and returns prediction
-@router.post('/predict', response_model=PredictionResponse)
+@router.post("/predict", response_model=PredictionResponse)
 def predict_premium(data: UserInput):
     """
     Predict insurance premium based on user input.
     """
-
-    # Convert Pydantic model to dictionary
     user_input = {
-        'bmi': data.bmi,
-        'age_group': data.age_group,
-        'lifestyle_risk': data.lifestyle_risk,
-        'city_tier': data.city_tier,
-        'income_lpa': data.income_lpa,
-        'occupation': data.occupation
+        "bmi": data.bmi,
+        "age_group": data.age_group,
+        "lifestyle_risk": data.lifestyle_risk,
+        "city_tier": data.city_tier,
+        "income_lpa": data.income_lpa,
+        "occupation": data.occupation
     }
 
     try:
-        # Make prediction using model
         prediction = predict_output(user_input)
-
-        # Return prediction as JSON
-        return JSONResponse(status_code=200, content={'response': prediction})
-
+        return JSONResponse(status_code=200, content={"response": prediction})
     except Exception as e:
-        # Return error message if something goes wrong
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+@router.post("/predict")
+def predict(data: PredictionInput):
+    try:
+        # Calculate BMI
+        bmi = data.weight / (data.height ** 2)
+
+        # Prepare input for the model
+        input_data = pd.DataFrame([{
+            "bmi": bmi,
+            "age": data.age,
+            "income_lpa": data.income_lpa,
+            "smoker": data.smoker,
+            "city": data.city,
+            "occupation": data.occupation
+        }])
+
+        # Make prediction
+        prediction = model.predict(input_data)[0]
+        probabilities = model.predict_proba(input_data)[0]
+
+        return {
+            "predicted_category": prediction,
+            "confidence": max(probabilities),
+            "class_probabilities": {
+                "Low": probabilities[0],
+                "Medium": probabilities[1],
+                "High": probabilities[2]
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
