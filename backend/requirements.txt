@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+requests
+passlib[bcrypt]
+pandas
+scikit-learn
