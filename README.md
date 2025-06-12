@@ -5,10 +5,14 @@ This project predicts the insurance premium category for users based on their pe
 ## Features
 
 - **FastAPI Backend**: Serves the machine learning model for predictions.
-- **Streamlit Frontend**: Provides an interactive UI for users to input their details and view predictions.
+- **Streamlit Frontend**: Provides an interactive UI for users to input their details and view predictions. The title and subtitle are resized for better readability.
 - **Authentication**: Includes signup and login functionality for user management.
 - **Gradio Interface**: Supports deployment on Hugging Face Spaces.
 - **Dockerized Setup**: Easily deployable using Docker.
+
+## Purpose
+
+The Insurance Premium Predictor helps users estimate their insurance premium category (e.g., Low, Medium, High) based on factors such as age, weight, height, income, smoking habits, city, and occupation. This tool is designed to provide insights into premium categories and assist in financial planning.
 
 ## Authentication Endpoints
 

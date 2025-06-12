@@ -80,7 +80,8 @@ if st.session_state.logged_in:
 
         try:
             with st.spinner("Predicting..."):
-                response = requests.post(API_URL + "/api/predict", json=input_data, timeout=10)
+                # Increased timeout to 30 seconds
+                response = requests.post(API_URL + "/api/predict", json=input_data, timeout=30)
                 response.raise_for_status()  # Raise HTTPError for bad responses (4xx and 5xx)
 
                 result = response.json()

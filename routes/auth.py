@@ -3,13 +3,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from models.user import User
 from database.database import SessionLocal
-from models.utils import hash_password, verify_password, create_token
-from passlib.context import CryptContext
 from schema.signloginRequest import SignupRequest, LoginRequest
+from passlib.context import CryptContext
 
 router = APIRouter()
 
-# Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Dependency to get DB session
@@ -37,5 +35,4 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == request.username).first()
     if not user or not pwd_context.verify(request.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    token = create_token({"sub": user.username})
-    return {"access_token": token, "token_type": "bearer"}
+    return {"message": "Login successful"}
